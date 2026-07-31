@@ -1,5 +1,4 @@
-import { StorageBufferAttribute } from 'three';
-import type WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
+import { StorageBufferAttribute, type WebGPURenderer } from 'three/webgpu';
 import {
 	Fn,
 	If,

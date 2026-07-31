@@ -1,5 +1,4 @@
-import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
-import { StorageBufferAttribute } from 'three';
+import { StorageBufferAttribute, WebGPURenderer } from 'three/webgpu';
 import { RadixSort } from './RadixSort';
 import { referenceSort, validateSort } from './reference';
 import './style.css';
