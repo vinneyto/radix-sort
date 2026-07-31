@@ -1,0 +1,26 @@
+{
+	"name": "three-webgpu-radix-sort",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"three": "^0.180.0"
+	},
+	"devDependencies": {
+		"@types/three": "^0.180.0",
+		"@webgpu/types": "^0.1.64",
+		"prettier": "^3.6.2",
+		"typescript": "^5.9.2",
+		"vite": "^7.1.0",
+		"vitest": "^3.2.4"
+	}
+}
