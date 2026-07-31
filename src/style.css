@@ -16,5 +16,9 @@ pre {
 	background: #272727;
 }
 
-.ok { color: #72db72; }
-.error { color: #ff7070; }
+.ok {
+	color: #72db72;
+}
+.error {
+	color: #ff7070;
+}

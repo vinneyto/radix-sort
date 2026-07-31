@@ -10,10 +10,10 @@ import { StorageBufferAttribute } from 'three';
 import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
 import { RadixSort } from './src/RadixSort';
 
-const keys = new StorageBufferAttribute( Uint32Array.of( 40, 10, 30 ), 1 );
-const indices = new StorageBufferAttribute( Uint32Array.of( 2, 0, 1 ), 1 );
-const sortedIndices = new StorageBufferAttribute( new Uint32Array( 3 ), 1 );
-const sorter = new RadixSort( renderer, keys, indices, sortedIndices );
+const keys = new StorageBufferAttribute(Uint32Array.of(40, 10, 30), 1);
+const indices = new StorageBufferAttribute(Uint32Array.of(2, 0, 1), 1);
+const sortedIndices = new StorageBufferAttribute(new Uint32Array(3), 1);
+const sorter = new RadixSort(renderer, keys, indices, sortedIndices);
 
 await sorter.sortAsync(); // sortedIndices now contains [ 1, 2, 0 ]
 ```
@@ -45,6 +45,7 @@ and checks every index against a stable JavaScript `Array.sort()` reference.
 ```sh
 npm test
 npm run typecheck
+npm run format:check
 npm run build
 ```
 
