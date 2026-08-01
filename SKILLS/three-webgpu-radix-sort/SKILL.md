@@ -175,6 +175,8 @@ radixSort(indices, {
 
 Use fresh index copies for `Array.sort`, Three.js radix, and GPU radix. Validate both non-reference outputs against the full `Array.sort` result. When showing a percentage, label its direction explicitly; for example, `GPU / Three.js = GPU milliseconds / Three.js milliseconds * 100`, where values below 100% mean the GPU measurement is faster.
 
+Do not trust a single `performance.now()` sample for tiny CPU inputs: timer resolution can report `0 ms` and produce infinite ratios. Repeat fresh CPU sorts until a minimum aggregate duration (for example 50 ms), then report aggregate time divided by iteration count. Keep each repetition logically isolated by cloning the unsorted input.
+
 ## Diagnose recurring failures
 
 | Error or symptom | Likely cause | Correction |

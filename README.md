@@ -44,7 +44,9 @@ GPU result back, and compares every index with stable JavaScript `Array.sort()`
 and the CPU hybrid radix implementation exported by Three.js `SortUtils`. Despite
 the occasional “bitonic” label, `three/addons/utils/SortUtils.js` currently
 exports `radixSort`, not a bitonic GPU sorter. The results table reports all
-three timings and GPU time as a percentage of the Three.js radix time.
+three timings, `Array.sort / GPU radix`, and `GPU radix / Three.js CPU radix`.
+Short CPU sorts are repeated for at least 50 ms and displayed as average time
+per operation, avoiding zero-duration samples and infinite percentages.
 
 ## Tests
 

@@ -6,6 +6,8 @@ import './style.css';
 
 const SIZES = [10, 100, 1_000, 10_000, 100_000, 1_000_000] as const;
 const WARMUP_SIZE = 4_096;
+const MIN_CPU_SAMPLE_MS = 50;
+const MAX_CPU_ITERATIONS = 10_000;
 
 const sortWithThree = threeRadixSort as unknown as (
 	indices: Uint32Array,
@@ -69,11 +71,25 @@ function assertEqual(expected: readonly number[], actual: Uint32Array): void {
 	}
 }
 
-function threeSort(keys: Uint32Array, indices: Uint32Array): { result: Uint32Array; milliseconds: number } {
-	const result = indices.slice();
+function measureCpu<T>(operation: () => T): { result: T; milliseconds: number } {
+	let result!: T;
+	let iterations = 0;
 	const started = performance.now();
-	sortWithThree(result, { aux: new Uint32Array(result.length), get: (index) => keys[index] });
-	return { result, milliseconds: performance.now() - started };
+	let elapsed: number;
+	do {
+		result = operation();
+		iterations++;
+		elapsed = performance.now() - started;
+	} while (elapsed < MIN_CPU_SAMPLE_MS && iterations < MAX_CPU_ITERATIONS);
+	return { result, milliseconds: elapsed / iterations };
+}
+
+function threeSort(keys: Uint32Array, indices: Uint32Array): { result: Uint32Array; milliseconds: number } {
+	return measureCpu(() => {
+		const result = indices.slice();
+		sortWithThree(result, { aux: new Uint32Array(result.length), get: (index) => keys[index] });
+		return result;
+	});
 }
 
 function formatTime(milliseconds: number): string {
@@ -98,19 +114,18 @@ async function main() {
 		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
 		const { keys, indices } = createExperimentData(count, 0x9e3779b9 ^ count);
-		const cpuStarted = performance.now();
-		const expected = referenceSort(keys, indices);
-		const cpuMilliseconds = performance.now() - cpuStarted;
+		const array = measureCpu(() => referenceSort(keys, indices));
 		const three = threeSort(keys, indices);
 		const gpu = await radixSort(renderer, keys, indices);
-		assertEqual(expected, three.result);
-		assertEqual(expected, gpu.result);
+		assertEqual(array.result, three.result);
+		assertEqual(array.result, gpu.result);
 
 		const row = body.insertRow();
 		row.insertCell().textContent = count.toLocaleString();
 		row.insertCell().textContent = formatTime(gpu.milliseconds);
 		row.insertCell().textContent = formatTime(three.milliseconds);
-		row.insertCell().textContent = formatTime(cpuMilliseconds);
+		row.insertCell().textContent = formatTime(array.milliseconds);
+		row.insertCell().textContent = `${((array.milliseconds / gpu.milliseconds) * 100).toFixed(1)}%`;
 		row.insertCell().textContent = `${((gpu.milliseconds / three.milliseconds) * 100).toFixed(1)}%`;
 		const resultCell = row.insertCell();
 		resultCell.textContent = 'PASS';

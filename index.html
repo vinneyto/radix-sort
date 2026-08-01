@@ -12,6 +12,10 @@
 			sort from Three.js <code>SortUtils</code>. (Three.js does not provide a bitonic sort in this utility.)
 		</p>
 		<p id="status">Initializing WebGPU…</p>
+		<p class="hint">
+			Percentages are time ratios: above 100% in <strong>Array / GPU</strong> means GPU radix is faster; below 100% in
+			<strong>GPU / CPU radix</strong> means GPU radix is faster.
+		</p>
 		<div class="table-wrap">
 			<table>
 				<thead>
@@ -20,7 +24,8 @@
 						<th>GPU radix</th>
 						<th>Three.js radix</th>
 						<th>Array.sort</th>
-						<th>GPU / Three.js</th>
+						<th>Array / GPU</th>
+						<th>GPU / CPU radix</th>
 						<th>Check</th>
 					</tr>
 				</thead>
