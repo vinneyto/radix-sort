@@ -162,6 +162,19 @@ State timing boundaries clearly. In particular, distinguish:
 
 Never claim a performance advantage from a correctness-only run whose timing boundaries differ.
 
+### Compare with Three.js SortUtils accurately
+
+Inspect `three/addons/utils/SortUtils.js` before naming the baseline. In Three.js r180 it exports a CPU hybrid `radixSort`, not a GPU bitonic sort. It accepts a `get` callback, so it can sort the same indirect index permutation:
+
+```ts
+radixSort(indices, {
+  aux: new Uint32Array(indices.length),
+  get: (index) => keys[index]
+});
+```
+
+Use fresh index copies for `Array.sort`, Three.js radix, and GPU radix. Validate both non-reference outputs against the full `Array.sort` result. When showing a percentage, label its direction explicitly; for example, `GPU / Three.js = GPU milliseconds / Three.js milliseconds * 100`, where values below 100% mean the GPU measurement is faster.
+
 ## Diagnose recurring failures
 
 | Error or symptom | Likely cause | Correction |

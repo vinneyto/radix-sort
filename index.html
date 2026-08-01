@@ -8,8 +8,8 @@
 	<body>
 		<h1>three.js WebGPU indirect radix sort</h1>
 		<p>
-			Each isolated experiment sorts the same shuffled indices by duplicate-heavy unsigned keys on the GPU and with
-			JavaScript <code>Array.sort()</code>, then compares every output element.
+			Each experiment compares the GPU implementation, JavaScript <code>Array.sort()</code>, and the CPU hybrid radix
+			sort from Three.js <code>SortUtils</code>. (Three.js does not provide a bitonic sort in this utility.)
 		</p>
 		<p id="status">Initializing WebGPU…</p>
 		<div class="table-wrap">
@@ -18,8 +18,9 @@
 					<tr>
 						<th>Elements</th>
 						<th>GPU radix</th>
+						<th>Three.js radix</th>
 						<th>Array.sort</th>
-						<th>CPU/GPU</th>
+						<th>GPU / Three.js</th>
 						<th>Check</th>
 					</tr>
 				</thead>

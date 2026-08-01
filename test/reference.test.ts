@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { radixSort as threeRadixSort } from 'three/addons/utils/SortUtils.js';
 import { referenceSort, validateSort } from '../src/reference';
 
 describe('Array.sort reference', () => {
@@ -16,5 +17,14 @@ describe('Array.sort reference', () => {
 
 	test('validation rejects a wrong permutation', () => {
 		expect(() => validateSort([2, 1], [0, 1], [0, 1])).toThrow(/differs/);
+	});
+});
+
+describe('Three.js SortUtils radixSort', () => {
+	test('supports the same indirect stable ordering contract', () => {
+		const keys = Uint32Array.of(5, 2, 5, 5, 2);
+		const indices = [3, 0, 4, 2, 1];
+		threeRadixSort(indices, { get: (index) => keys[index] });
+		expect(indices).toEqual(referenceSort(keys, [3, 0, 4, 2, 1]));
 	});
 });
