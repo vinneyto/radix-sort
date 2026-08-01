@@ -36,9 +36,12 @@ npm install
 npm run dev
 ```
 
-Open the shown local URL in a WebGPU-capable browser. The demo creates duplicate
-keys and a reverse index permutation, runs the GPU sort, reads the result back,
-and checks every index against a stable JavaScript `Array.sort()` reference.
+Open the shown local URL in a WebGPU-capable browser. The demo first warms up the
+radix pipelines, then runs isolated experiments at 10, 100, 1,000, 10,000,
+100,000, and 1,000,000 elements. Every experiment creates deterministic,
+duplicate-heavy keys and shuffled indices, times both implementations, reads the
+GPU result back, and compares every index with stable JavaScript `Array.sort()`.
+The page adds each successful experiment to a results table as it completes.
 
 ## Tests
 

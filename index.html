@@ -8,10 +8,24 @@
 	<body>
 		<h1>three.js WebGPU indirect radix sort</h1>
 		<p>
-			The GPU sorts indices by immutable unsigned 32-bit keys. The result is checked against JavaScript
-			<code>Array.sort()</code>.
+			Each isolated experiment sorts the same shuffled indices by duplicate-heavy unsigned keys on the GPU and with
+			JavaScript <code>Array.sort()</code>, then compares every output element.
 		</p>
-		<pre id="output">Running…</pre>
+		<p id="status">Initializing WebGPU…</p>
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr>
+						<th>Elements</th>
+						<th>GPU radix</th>
+						<th>Array.sort</th>
+						<th>CPU/GPU</th>
+						<th>Check</th>
+					</tr>
+				</thead>
+				<tbody id="results"></tbody>
+			</table>
+		</div>
 		<script type="module" src="/src/main.ts"></script>
 	</body>
 </html>

@@ -2,9 +2,9 @@ export type UnsignedKeys = ArrayLike<number>;
 export type Indices = ArrayLike<number> & Iterable<number>;
 
 export function referenceSort(keys: UnsignedKeys, indices: Indices): number[] {
-	return Array.from(indices, (index, position) => ({ index, position }))
-		.sort((a, b) => keys[a.index] - keys[b.index] || a.position - b.position)
-		.map((entry) => entry.index);
+	// ECMAScript requires Array.sort to be stable. Comparing keys alone makes
+	// this both the direct CPU baseline and the stability oracle for radix sort.
+	return Array.from(indices).sort((a, b) => keys[a] - keys[b]);
 }
 
 export function validateSort(keys: UnsignedKeys, input: Indices, actual: Indices): true {
