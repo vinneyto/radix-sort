@@ -36,9 +36,19 @@ npm install
 npm run dev
 ```
 
-Open the shown local URL in a WebGPU-capable browser. The demo creates duplicate
-keys and a reverse index permutation, runs the GPU sort, reads the result back,
-and checks every index against a stable JavaScript `Array.sort()` reference.
+Open the shown local URL in a WebGPU-capable browser. The demo first warms up the
+radix pipelines, then runs isolated experiments at 10, 100, 1,000, 10,000,
+100,000, and 1,000,000 elements. Every experiment creates deterministic,
+duplicate-heavy keys and shuffled indices, times both implementations, reads the
+GPU result back, and compares every index with stable JavaScript `Array.sort()`
+and the CPU hybrid radix implementation exported by Three.js `SortUtils`. Despite
+the occasional “bitonic” label, `three/addons/utils/SortUtils.js` currently
+exports `radixSort`, not a bitonic GPU sorter. The results table reports all
+three timings and two GPU speedup ratios relative to the CPU baselines. Ratios
+divide CPU time by GPU time: above `1×` means GPU radix is faster and below `1×`
+means it is slower (for example, 12.12 ms / 3.50 ms = 3.46×).
+Short CPU sorts are repeated for at least 50 ms and displayed as average time
+per operation, avoiding zero-duration samples and infinite percentages.
 
 ## Tests
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Three.js WebGPU Radix Sort"
+  short_description: "Implement and debug native WGSL radix sort kernels"
+  default_prompt: "Implement or debug a stable indirect radix sort in Three.js WebGPU using wgslFn and validate its generated WGSL and results."

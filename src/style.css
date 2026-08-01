@@ -5,15 +5,45 @@
 }
 
 body {
-	max-width: 56rem;
+	max-width: 64rem;
 	margin: 3rem auto;
 	padding: 0 1rem;
 }
 
-pre {
-	padding: 1rem;
-	overflow: auto;
+.table-wrap {
+	overflow-x: auto;
+}
+
+.hint {
+	color: #bcbcbc;
+	font-size: 0.9rem;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
 	background: #272727;
+}
+
+th,
+td {
+	padding: 0.75rem 1rem;
+	text-align: right;
+	border-bottom: 1px solid #444444;
+}
+
+th:first-child,
+td:first-child {
+	text-align: left;
+}
+
+th {
+	color: #b9c8ff;
+}
+
+.pass {
+	color: #72db72;
+	font-weight: 700;
 }
 
 .ok {
