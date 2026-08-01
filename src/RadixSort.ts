@@ -11,7 +11,7 @@ const histogramWGSL = wgslFn(/* wgsl */ `
 		keys: ptr<storage, array<u32>, read>,
 		input: ptr<storage, array<u32>, read_write>,
 		histograms: ptr<storage, array<u32>, read_write>,
-		local_histogram: ptr<workgroup, array<atomic<u32>, ${RADIX_SIZE}>, read_write>,
+		local_histogram: ptr<workgroup, array<atomic<u32>, ${RADIX_SIZE}>>,
 		position: u32,
 		lid: u32,
 		group: u32,
@@ -40,7 +40,7 @@ const scanWGSL = wgslFn(/* wgsl */ `
 	fn radix_scan(
 		histograms: ptr<storage, array<u32>, read_write>,
 		offsets: ptr<storage, array<u32>, read_write>,
-		bin_totals: ptr<workgroup, array<u32, ${RADIX_SIZE}>, read_write>,
+		bin_totals: ptr<workgroup, array<u32, ${RADIX_SIZE}>>,
 		bin: u32,
 		group_count: u32
 	) -> void {
@@ -73,7 +73,7 @@ const scatterWGSL = wgslFn(/* wgsl */ `
 		input: ptr<storage, array<u32>, read_write>,
 		output: ptr<storage, array<u32>, read_write>,
 		offsets: ptr<storage, array<u32>, read_write>,
-		tile_digits: ptr<workgroup, array<u32, ${WORKGROUP_SIZE}>, read_write>,
+		tile_digits: ptr<workgroup, array<u32, ${WORKGROUP_SIZE}>>,
 		position: u32,
 		lid: u32,
 		group: u32,
