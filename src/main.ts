@@ -1,7 +1,7 @@
 import { StorageBufferAttribute, WebGPURenderer } from 'three/webgpu';
 import { radixSort as threeRadixSort } from 'three/addons/utils/SortUtils.js';
 import { RadixSort } from './RadixSort';
-import { relativeTimePercent } from './benchmark';
+import { speedupRatio } from './benchmark';
 import { referenceSort } from './reference';
 import './style.css';
 
@@ -126,8 +126,8 @@ async function main() {
 		row.insertCell().textContent = formatTime(gpu.milliseconds);
 		row.insertCell().textContent = formatTime(three.milliseconds);
 		row.insertCell().textContent = formatTime(array.milliseconds);
-		row.insertCell().textContent = `${relativeTimePercent(array.milliseconds, gpu.milliseconds).toFixed(1)}%`;
-		row.insertCell().textContent = `${relativeTimePercent(three.milliseconds, gpu.milliseconds).toFixed(1)}%`;
+		row.insertCell().textContent = `${speedupRatio(array.milliseconds, gpu.milliseconds).toFixed(2)}×`;
+		row.insertCell().textContent = `${speedupRatio(three.milliseconds, gpu.milliseconds).toFixed(2)}×`;
 		const resultCell = row.insertCell();
 		resultCell.textContent = 'PASS';
 		resultCell.className = 'pass';

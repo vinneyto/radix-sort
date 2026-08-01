@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { radixSort as threeRadixSort } from 'three/addons/utils/SortUtils.js';
 import { referenceSort, validateSort } from '../src/reference';
-import { relativeTimePercent } from '../src/benchmark';
+import { speedupRatio } from '../src/benchmark';
 
 describe('Array.sort reference', () => {
 	test('is indirect and stable', () => {
@@ -22,8 +22,9 @@ describe('Array.sort reference', () => {
 });
 
 describe('benchmark ratios', () => {
-	test('reports CPU baseline time relative to GPU candidate time', () => {
-		expect(relativeTimePercent(12.12, 3.5)).toBeCloseTo(346.2857142857143);
+	test('reports how many times faster the GPU candidate is than the CPU baseline', () => {
+		expect(speedupRatio(12.12, 3.5)).toBeCloseTo(3.462857142857143);
+		expect(speedupRatio(1, 2)).toBe(0.5);
 	});
 });
 

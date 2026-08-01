@@ -1,4 +1,4 @@
-/** Return baseline time as a percentage of candidate time. */
-export function relativeTimePercent(baselineMilliseconds: number, candidateMilliseconds: number): number {
-	return (baselineMilliseconds / candidateMilliseconds) * 100;
+/** Return how many times faster the candidate is than the baseline. */
+export function speedupRatio(baselineMilliseconds: number, candidateMilliseconds: number): number {
+	return baselineMilliseconds / candidateMilliseconds;
 }

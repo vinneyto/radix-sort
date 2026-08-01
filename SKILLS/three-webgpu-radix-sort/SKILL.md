@@ -173,7 +173,7 @@ radixSort(indices, {
 });
 ```
 
-Use fresh index copies for `Array.sort`, Three.js radix, and GPU radix. Validate both non-reference outputs against the full `Array.sort` result. When presenting speed comparisons, consistently divide baseline CPU time by candidate GPU time: `CPU / GPU = CPU milliseconds / GPU milliseconds * 100`. Values above 100% then mean the GPU is faster. Keep the table header in the same numerator/denominator order as the formula.
+Use fresh index copies for `Array.sort`, Three.js radix, and GPU radix. Validate both non-reference outputs against the full `Array.sort` result. Present speedup as a dimensionless ratio: `CPU milliseconds / GPU milliseconds`. Values above `1×` mean the GPU is faster; values below `1×` mean it is slower. Prefer this to percentages because the direction is immediately visible.
 
 Do not trust a single `performance.now()` sample for tiny CPU inputs: timer resolution can report `0 ms` and produce infinite ratios. Repeat fresh CPU sorts until a minimum aggregate duration (for example 50 ms), then report aggregate time divided by iteration count. Keep each repetition logically isolated by cloning the unsorted input.
 
