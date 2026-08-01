@@ -151,7 +151,7 @@ class RadixSort {
 							this.offsets.element(address).addAssign(base);
 						});
 					}
-					base.addAssign(binTotals.element(digit));
+					base.addAssign(binTotals.element(uint(digit)));
 				}
 			});
 		})().compute(WORKGROUP_SIZE, [WORKGROUP_SIZE]);
@@ -178,7 +178,7 @@ class RadixSort {
 				If(valid, () => {
 					const rank = uint(0).toVar();
 					for (let previous = 0; previous < WORKGROUP_SIZE; previous++) {
-						If(uint(previous).lessThan(localId.x).and(tileDigits.element(previous).equal(digit)), () =>
+						If(uint(previous).lessThan(localId.x).and(tileDigits.element(uint(previous)).equal(digit)), () =>
 							rank.addAssign(1)
 						);
 					}
