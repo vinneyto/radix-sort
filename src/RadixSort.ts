@@ -169,13 +169,19 @@ class RadixSort {
 					group: workgroupId.x,
 					count,
 					shift: this.shift
-				});
+				}).append();
 			})().compute(groupCount * WORKGROUP_SIZE, [WORKGROUP_SIZE])
 		);
 
 		const binTotals = workgroupArray('uint', RADIX_SIZE);
 		this.scanNode = Fn(() => {
-			scanWGSL({ histograms, offsets, bin_totals: binTotals, bin: localId.x, group_count: groups });
+			scanWGSL({
+				histograms,
+				offsets,
+				bin_totals: binTotals,
+				bin: localId.x,
+				group_count: groups
+			}).append();
 		})().compute(WORKGROUP_SIZE, [WORKGROUP_SIZE]);
 
 		const scatter = (input: any, destination: any) => {
@@ -192,7 +198,7 @@ class RadixSort {
 					group: workgroupId.x,
 					count,
 					shift: this.shift
-				});
+				}).append();
 			})().compute(groupCount * WORKGROUP_SIZE, [WORKGROUP_SIZE]);
 		};
 		this.scatterNodes = [
