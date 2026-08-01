@@ -1,5 +1,5 @@
 import { StorageBufferAttribute, type WebGPURenderer } from 'three/webgpu';
-import { Fn, globalId, localId, storage, uniform, wgslFn, workgroupArray, workgroupId } from 'three/tsl';
+import { globalId, localId, storage, uniform, wgslFn, workgroupArray, workgroupId } from 'three/tsl';
 
 const RADIX_BITS = 4;
 const RADIX_SIZE = 1 << RADIX_BITS;
@@ -158,48 +158,42 @@ class RadixSort {
 
 		const localHistogram = workgroupArray(`atomic<u32>`, RADIX_SIZE);
 		this.histogramNodes = buffers.map((input) =>
-			Fn(() => {
-				histogramWGSL({
-					keys: keyBuffer,
-					input,
-					histograms,
-					local_histogram: localHistogram,
-					position: globalId.x,
-					lid: localId.x,
-					group: workgroupId.x,
-					count,
-					shift: this.shift
-				}).append();
-			})().compute(groupCount * WORKGROUP_SIZE, [WORKGROUP_SIZE])
+			histogramWGSL({
+				keys: keyBuffer,
+				input,
+				histograms,
+				local_histogram: localHistogram,
+				position: globalId.x,
+				lid: localId.x,
+				group: workgroupId.x,
+				count,
+				shift: this.shift
+			}).compute(groupCount * WORKGROUP_SIZE, [WORKGROUP_SIZE])
 		);
 
 		const binTotals = workgroupArray('uint', RADIX_SIZE);
-		this.scanNode = Fn(() => {
-			scanWGSL({
-				histograms,
-				offsets,
-				bin_totals: binTotals,
-				bin: localId.x,
-				group_count: groups
-			}).append();
-		})().compute(WORKGROUP_SIZE, [WORKGROUP_SIZE]);
+		this.scanNode = scanWGSL({
+			histograms,
+			offsets,
+			bin_totals: binTotals,
+			bin: localId.x,
+			group_count: groups
+		}).compute(WORKGROUP_SIZE, [WORKGROUP_SIZE]);
 
 		const scatter = (input: any, destination: any) => {
 			const tileDigits = workgroupArray('uint', WORKGROUP_SIZE);
-			return Fn(() => {
-				scatterWGSL({
-					keys: keyBuffer,
-					input,
-					output: destination,
-					offsets,
-					tile_digits: tileDigits,
-					position: globalId.x,
-					lid: localId.x,
-					group: workgroupId.x,
-					count,
-					shift: this.shift
-				}).append();
-			})().compute(groupCount * WORKGROUP_SIZE, [WORKGROUP_SIZE]);
+			return scatterWGSL({
+				keys: keyBuffer,
+				input,
+				output: destination,
+				offsets,
+				tile_digits: tileDigits,
+				position: globalId.x,
+				lid: localId.x,
+				group: workgroupId.x,
+				count,
+				shift: this.shift
+			}).compute(groupCount * WORKGROUP_SIZE, [WORKGROUP_SIZE]);
 		};
 		this.scatterNodes = [
 			scatter(buffers[0], buffers[1]),
