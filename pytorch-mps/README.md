@@ -28,10 +28,18 @@ python -m pip install -r pytorch-mps/requirements.txt
 
 ## Algorithm and tensor contract
 
-`radix_sort_mps(keys, indices)` and `MPSRadixSort.sort(keys, indices)` sort only
+`radix_sort_mps(keys, indices, output=None)` and
+`MPSRadixSort.sort(..., output=None)` sort only
 `indices`; `keys` remains immutable and is read indirectly as
 `keys[indices[position]]`. The result is stable, so equal keys preserve their
 relative order from the input index sequence.
+
+For WebGPU-like caller ownership, create the output tensor outside the sorter and
+pass it either to `MPSRadixSort(capacity, output=output)` or to an individual
+`sort(..., output=output)` call. The final radix pass writes into that tensor and
+the returned value is `output[:length]`. If no output tensor is supplied, the
+sorter allocates one internal output tensor once and reuses it; `sort()` does not
+allocate a fresh result buffer for every call.
 
 The baseline configuration matches `src/RadixSort.ts`:
 
@@ -60,8 +68,8 @@ Each radix pass is three ordered dispatches:
    output position.
 
 Ping-pong buffers match the WebGPU example: pass 0 writes original to scratch,
-pass 1 writes scratch to the caller-visible output, and the pattern repeats until
-pass 7 leaves the final result in the output tensor returned by `sort()`.
+pass 1 writes scratch to the caller-visible output tensor, and the pattern repeats
+until pass 7 leaves the final result in the output tensor returned by `sort()`.
 
 ## Run tests and benchmark
 

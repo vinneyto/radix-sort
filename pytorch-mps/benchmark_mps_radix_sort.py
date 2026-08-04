@@ -49,7 +49,8 @@ def main() -> int:
     for n in [10_000, 100_000, 1_000_000]:
         keys_cpu, indices_cpu = make_data(n)
         keys = keys_cpu.to("mps"); indices = indices_cpu.to("mps")
-        sorter = MPSRadixSort(n)
+        output = torch.empty(n, device="mps", dtype=torch.int32)
+        sorter = MPSRadixSort(n, output=output)
         for _ in range(3):
             sorter.sort(keys, indices)
         torch.mps.synchronize()

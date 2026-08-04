@@ -53,7 +53,8 @@ per operation, avoiding zero-duration samples and infinite percentages.
 ## PyTorch MPS Metal implementation
 
 A standalone PyTorch MPS example lives in [`pytorch-mps/`](pytorch-mps/). It
-repeats the WebGPU baseline algorithm, compiles the Metal kernels directly from
+repeats the WebGPU baseline algorithm, writes the final pass into a caller-owned
+output tensor when one is supplied, compiles the Metal kernels directly from
 Python with `torch.mps.compile_shader(...)`, and does not require a C++ extension.
 Run it with:
 

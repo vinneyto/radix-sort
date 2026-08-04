@@ -63,8 +63,12 @@ def make_case(name: str, n: int) -> tuple[torch.Tensor, torch.Tensor, int]:
 def assert_case(case_name: str, n: int, keys_cpu: torch.Tensor, indices_cpu: torch.Tensor, length: int) -> None:
     keys_mps = keys_cpu.to("mps")
     indices_mps = indices_cpu.to("mps")
-    sorter = MPSRadixSort(indices_cpu.numel())
+    output_mps = torch.empty(
+        indices_cpu.numel(), device="mps", dtype=torch.int32
+    )
+    sorter = MPSRadixSort(indices_cpu.numel(), output=output_mps)
     result = sorter.sort(keys_mps, indices_mps, length=length)
+    assert result.data_ptr() == output_mps.data_ptr()
     torch.mps.synchronize()
     actual = [unsigned_value(int(v)) for v in result.cpu().tolist()]
     keys_list = [unsigned_value(int(v)) for v in keys_cpu.tolist()]
@@ -89,7 +93,10 @@ def main() -> int:
         return 0
     smoke_keys = to_i32([3, 1, 2]).to("mps")
     smoke_indices = to_i32([0, 1, 2]).to("mps")
-    assert [int(v) for v in radix_sort_mps(smoke_keys, smoke_indices).cpu().tolist()] == [1, 2, 0]
+    smoke_output = torch.empty(3, device="mps", dtype=torch.int32)
+    smoke_result = radix_sort_mps(smoke_keys, smoke_indices, output=smoke_output)
+    assert smoke_result.data_ptr() == smoke_output.data_ptr()
+    assert [int(v) for v in smoke_result.cpu().tolist()] == [1, 2, 0]
     passed = 1
     for n in SIZES:
         for case_name in ["random32", "duplicates", "all_equal", "sorted", "reverse", "repeated_indices", "partial_length"]:

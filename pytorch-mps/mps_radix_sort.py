@@ -151,13 +151,13 @@ class KernelProperties:
 
 
 class MPSRadixSort:
-    def __init__(self, capacity: int):
+    def __init__(self, capacity: int, output: torch.Tensor | None = None):
         if capacity < 0:
             raise ValueError("capacity must be non-negative")
         self.capacity = int(capacity)
         group_count = max(1, (self.capacity + WORKGROUP_SIZE - 1) // WORKGROUP_SIZE)
         self._scratch = torch.empty(self.capacity, device="mps", dtype=torch.int32)
-        self._output = torch.empty(self.capacity, device="mps", dtype=torch.int32)
+        self._output = self._prepare_constructor_output(output)
         self._histograms = torch.empty(group_count * RADIX_SIZE, device="mps", dtype=torch.int32)
         self._offsets = torch.empty(group_count * RADIX_SIZE, device="mps", dtype=torch.int32)
         library = _compile_library()
@@ -178,18 +178,33 @@ class MPSRadixSort:
             getattr(kernel, "static_thread_group_memory_length", None),
         )
 
-    def sort(self, keys: torch.Tensor, indices: torch.Tensor, length: int | None = None) -> torch.Tensor:
+    def sort(
+        self,
+        keys: torch.Tensor,
+        indices: torch.Tensor,
+        length: int | None = None,
+        output: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        """Sort ``indices`` by indirectly read ``keys`` into a caller-visible output buffer.
+
+        If ``output`` is provided, the final pass writes into that tensor and the
+        returned value is ``output[:length]``. Otherwise the sorter reuses the
+        output tensor supplied to ``__init__`` or allocates one internal output
+        tensor for the sorter lifetime. In all cases, repeated calls may
+        overwrite the same output tensor.
+        """
         count = indices.numel() if length is None else int(length)
-        self._validate_inputs(keys, indices, count)
+        output_buffer = self._output if output is None else output
+        self._validate_inputs(keys, indices, output_buffer, count)
         if count == 0:
-            return self._output[:0]
+            return output_buffer[:0]
 
         group_count = (count + WORKGROUP_SIZE - 1) // WORKGROUP_SIZE
         dispatch_size = group_count * WORKGROUP_SIZE
         histograms = self._histograms[: group_count * RADIX_SIZE]
         offsets = self._offsets[: group_count * RADIX_SIZE]
         scratch = self._scratch[:count]
-        output = self._output[:count]
+        output_slice = output_buffer[:count]
 
         input_buffer = indices[:count]
         for pass_index in range(PASSES):
@@ -200,14 +215,24 @@ class MPSRadixSort:
             self._scan(histograms, offsets, group_count,
                        threads=WORKGROUP_SIZE, group_size=WORKGROUP_SIZE,
                        arg_casts={2: "int32"})
-            destination = scratch if pass_index % 2 == 0 else output
+            destination = scratch if pass_index % 2 == 0 else output_slice
             self._scatter(keys, input_buffer, destination, offsets, count, shift,
                           threads=dispatch_size, group_size=WORKGROUP_SIZE,
                           arg_casts={4: "int32", 5: "int32"})
             input_buffer = destination
+        return output_slice
+
+    def _prepare_constructor_output(self, output: torch.Tensor | None) -> torch.Tensor:
+        if output is None:
+            return torch.empty(self.capacity, device="mps", dtype=torch.int32)
+        self._validate_output_tensor(output, 0)
+        if output.numel() < self.capacity:
+            raise ValueError("constructor output capacity is smaller than sorter capacity")
         return output
 
-    def _validate_inputs(self, keys: torch.Tensor, indices: torch.Tensor, length: int) -> None:
+    def _validate_inputs(
+        self, keys: torch.Tensor, indices: torch.Tensor, output: torch.Tensor, length: int
+    ) -> None:
         if not _mps_available():
             raise RuntimeError("PyTorch MPS is not available on this system")
         for name, tensor in (("keys", keys), ("indices", indices)):
@@ -219,6 +244,9 @@ class MPSRadixSort:
                 raise ValueError(f"{name} must be contiguous")
             if tensor.dtype not in SUPPORTED_DTYPES:
                 raise TypeError(f"{name} must use torch.int32 storage")
+        self._validate_output_tensor(output, length)
+        if output.data_ptr() == indices.data_ptr():
+            raise ValueError("output must not alias the input indices tensor")
         if length < 0:
             raise ValueError("length must be non-negative")
         if length > self.capacity:
@@ -226,6 +254,21 @@ class MPSRadixSort:
         if length > indices.numel():
             raise ValueError("length exceeds indices.numel()")
 
+    @staticmethod
+    def _validate_output_tensor(output: torch.Tensor, length: int) -> None:
+        if output.device.type != "mps":
+            raise TypeError("output must be an MPS tensor")
+        if output.dim() != 1:
+            raise ValueError("output must be one-dimensional")
+        if not output.is_contiguous():
+            raise ValueError("output must be contiguous")
+        if output.dtype not in SUPPORTED_DTYPES:
+            raise TypeError("output must use torch.int32 storage")
+        if output.numel() < length:
+            raise ValueError("output is shorter than length")
 
-def radix_sort_mps(keys: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
-    return MPSRadixSort(indices.numel()).sort(keys, indices)
+
+def radix_sort_mps(
+    keys: torch.Tensor, indices: torch.Tensor, output: torch.Tensor | None = None
+) -> torch.Tensor:
+    return MPSRadixSort(indices.numel(), output=output).sort(keys, indices)
