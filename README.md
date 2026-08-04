@@ -50,6 +50,18 @@ means it is slower (for example, 12.12 ms / 3.50 ms = 3.46×).
 Short CPU sorts are repeated for at least 50 ms and displayed as average time
 per operation, avoiding zero-duration samples and infinite percentages.
 
+## PyTorch MPS Metal implementation
+
+A standalone PyTorch MPS example lives in [`pytorch-mps/`](pytorch-mps/). It
+repeats the WebGPU baseline algorithm, compiles the Metal kernels directly from
+Python with `torch.mps.compile_shader(...)`, and does not require a C++ extension.
+Run it with:
+
+```sh
+python pytorch-mps/test_mps_radix_sort.py
+python pytorch-mps/benchmark_mps_radix_sort.py
+```
+
 ## Tests
 
 ```sh
