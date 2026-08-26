@@ -58,6 +58,7 @@ async function radixSort(
 	await sorter.sortAsync();
 	const milliseconds = performance.now() - started;
 	const result = new Uint32Array(await renderer.getArrayBufferAsync(outputAttribute));
+	sorter.dispose();
 	return { result, milliseconds };
 }
 
