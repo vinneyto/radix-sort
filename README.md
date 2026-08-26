@@ -20,10 +20,11 @@ await sorter.sortAsync(); // sortedIndices now contains [ 1, 2, 0 ]
 
 `sortedIndices` is owned by the caller: the sorter never replaces it, so the
 same storage attribute can be bound directly by a 3DGS rendering pipeline.
-`sortAsync()` waits for completion and is useful for readback and validation.
-In a render loop, call `sort()` instead; it enqueues the same passes through
-`renderer.compute()` without waiting for CPU/GPU synchronization, and later
-render commands can consume `sortedIndices` in submission order.
+`sortAsync()` asynchronously prepares and enqueues the compute passes, but does
+not guarantee that the GPU has finished executing them. Call
+`await renderer.waitForGPU()` when CPU code must wait for completion. In a
+render loop, call `sort()` without that wait; later render commands can consume
+`sortedIndices` in submission order without a CPU/GPU synchronization point.
 
 The baseline uses eight stable four-bit passes. Each pass dispatches a
 per-workgroup histogram, a global offset scan, and a stable scatter. The simple
@@ -47,6 +48,8 @@ exports `radixSort`, not a bitonic GPU sorter. The results table reports all
 three timings and two GPU speedup ratios relative to the CPU baselines. Ratios
 divide CPU time by GPU time: above `1×` means GPU radix is faster and below `1×`
 means it is slower (for example, 12.12 ms / 3.50 ms = 3.46×).
+The GPU timer includes command encoding, submission, and completion via
+`renderer.waitForGPU()`. Result readback happens after the timer and is excluded.
 Short CPU sorts are repeated for at least 50 ms and displayed as average time
 per operation, avoiding zero-duration samples and infinite percentages.
 
