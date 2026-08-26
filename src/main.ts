@@ -55,7 +55,8 @@ async function radixSort(
 	const sorter = new RadixSort(renderer, keyAttribute, indexAttribute, outputAttribute);
 
 	const started = performance.now();
-	await sorter.sortAsync();
+	sorter.sort();
+	await renderer.waitForGPU();
 	const milliseconds = performance.now() - started;
 	const result = new Uint32Array(await renderer.getArrayBufferAsync(outputAttribute));
 	return { result, milliseconds };
